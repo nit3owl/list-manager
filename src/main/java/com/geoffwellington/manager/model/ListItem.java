@@ -1,18 +1,26 @@
 package com.geoffwellington.manager.model;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import java.util.Objects;
+import java.util.UUID;
 
 @Entity
-@Table(name = "items")
+@Table(name = "item")
 public class ListItem {
-
     @Id
-    @GeneratedValue
-    private long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @ManyToOne
+    // Many ListItems belong to one List
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "list_id", nullable = false)
     private ManagedList list;
 
@@ -25,7 +33,10 @@ public class ListItem {
     @Column
     private int quantity;
 
-    public ListItem(long id, ManagedList list, String text, String label, int quantity) {
+    public ListItem() {
+    }
+
+    public ListItem(UUID id, ManagedList list, String text, String label, int quantity) {
         this.id = id;
         this.list = list;
         this.text = text;
@@ -33,14 +44,11 @@ public class ListItem {
         this.quantity = quantity;
     }
 
-    public ListItem() {
-    }
-
-    public long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -78,14 +86,20 @@ public class ListItem {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ListItem listItem = (ListItem) o;
-        return id == listItem.id && quantity == listItem.quantity && Objects.equals(list, listItem.list) && Objects.equals(text, listItem.text) && Objects.equals(label, listItem.label);
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ListItem item = (ListItem) o;
+        return Objects.equals(label, item.label);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, list, text, label, quantity);
+        return Objects.hashCode(label);
     }
 }
+
+

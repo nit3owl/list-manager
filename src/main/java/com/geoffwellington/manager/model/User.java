@@ -1,14 +1,21 @@
 package com.geoffwellington.manager.model;
 
-import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 /**
  * This object represents a User, but is named person in the DB to avoid conflicts with reserved words.
@@ -48,7 +55,8 @@ public class User {
     @OneToMany(mappedBy = "owner")
     private Set<ManagedList> lists;
 
-    public User(UUID id, String email, Instant created, Instant modified, String firstName, String lastName, SubscriptionType subscriptionType, Set<Membership> memberships, Set<ManagedList> lists) {
+    public User(UUID id, String email, Instant created, Instant modified, String firstName, String lastName,
+                SubscriptionType subscriptionType, Set<Membership> memberships, Set<ManagedList> lists) {
         this.id = id;
         this.email = email;
         this.created = created;
@@ -60,14 +68,10 @@ public class User {
         this.lists = lists;
     }
 
-    public User(String firstName, String lastName) {
+    public User(String firstName, String lastName, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
-    }
-
-    // Supports lazy deletes
-    public User(UUID id) {
-        this.id = id;
+        this.email = email;
     }
 
     public User() {
@@ -148,10 +152,15 @@ public class User {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(email, user.email) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName);
+        return Objects.equals(id, user.id) && Objects.equals(email, user.email)
+                && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName);
     }
 
     @Override

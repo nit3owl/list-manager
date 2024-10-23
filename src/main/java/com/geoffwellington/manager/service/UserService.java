@@ -1,19 +1,18 @@
 package com.geoffwellington.manager.service;
 
 import com.geoffwellington.manager.model.SubscriptionType;
-import com.geoffwellington.manager.model.User;
-
+import com.geoffwellington.manager.model.dto.UserDTO;
 import java.util.UUID;
 
 public interface UserService {
 
-    User createUser(User user);
+    UserDTO createUser(UserDTO user);
 
-    User getUser(UUID id);
+    UserDTO getUser(UUID id);
 
-    User updateUser(User user);
+    UserDTO updateUser(UUID id, UserDTO user);
 
     void deleteUser(UUID id);
 
-    Iterable<User> findBySubscription(SubscriptionType type);
+    Iterable<UserDTO> findBySubscription(SubscriptionType type);
 }
