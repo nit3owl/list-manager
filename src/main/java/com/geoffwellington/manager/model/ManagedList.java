@@ -1,20 +1,29 @@
 package com.geoffwellington.manager.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
+import jakarta.persistence.Table;
+import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.UUID;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.Instant;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @Table(name = "list")
 @EntityListeners(AuditingEntityListener.class)
 public class ManagedList {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -34,17 +43,10 @@ public class ManagedList {
     @Column
     private Instant modified;
 
-    @OneToMany(mappedBy = "list")
-    private LinkedHashSet<ListItem> items;
-
-    public ManagedList(UUID id, User owner, String name, Instant created, Instant modified, LinkedHashSet<ListItem> items) {
-        this.id = id;
-        this.owner = owner;
-        this.name = name;
-        this.created = created;
-        this.modified = modified;
-        this.items = items;
-    }
+    // One list can have many ListItems
+    @OneToMany(mappedBy = "list", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn
+    private Set<ListItem> items = new LinkedHashSet<>();
 
     public ManagedList() {
     }
@@ -89,24 +91,25 @@ public class ManagedList {
         this.modified = modified;
     }
 
-    public LinkedHashSet<ListItem> getItems() {
+    public Set<ListItem> getItems() {
         return items;
     }
 
-    public void setItems(LinkedHashSet<ListItem> items) {
+    public void setItems(Set<ListItem> items) {
         this.items = items;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ManagedList that = (ManagedList) o;
-        return Objects.equals(id, that.id) && Objects.equals(owner, that.owner) && Objects.equals(name, that.name) && Objects.equals(created, that.created) && Objects.equals(modified, that.modified) && Objects.equals(items, that.items);
+    public void clearItems() {
+        this.items.clear();
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, owner, name, created, modified, items);
+    public void addItem(ListItem item) {
+        items.add(item);
+        item.setList(this);
+    }
+
+    public void removeItem(ListItem item) {
+        items.remove(item);
+        item.setList(null);
     }
 }

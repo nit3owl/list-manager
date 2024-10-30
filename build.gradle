@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.3'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'jacoco'
+    id 'checkstyle'
 }
 
 group = 'com.geoffwellington'
@@ -13,6 +15,12 @@ java {
 	}
 }
 
+checkstyle {
+	toolVersion = '10.19.0'
+	sourceSets = [project.sourceSets.main]
+	maxWarnings = 0
+}
+
 repositories {
 	mavenCentral()
 }
@@ -22,7 +30,6 @@ dependencies {
 	implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.16'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.0'
 	implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.24.0'
-	testImplementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j2-impl', version: '2.23.1'
 
 	// Spring
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -35,8 +42,72 @@ dependencies {
 
 	// Testing
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// Utility
+	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.2.1'
+	implementation group: 'commons-validator', name: 'commons-validator', version: '1.9.0'
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+test {
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	dependsOn test // tests are required to run before generating the report
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"com/geoffwellington/manager/ListManagerApplication.class",
+					"**/configuration/*",
+					"**/exception/*",
+					"**/model/**"
+			])
+		}))
+	}
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.9
+			}
+			classDirectories.setFrom(files(classDirectories.files.collect {
+				fileTree(dir: it, exclude: [
+						"com/geoffwellington/manager/ListManagerApplication.class",
+						"**/configuration/*",
+						"**/exception/*",
+						"**/model/**"
+				])
+			}))
+		}
+		rule {
+			element = 'CLASS'
+			limit {
+				minimum = 0.9
+			}
+			classDirectories.setFrom(files(classDirectories.files.collect {
+				fileTree(dir: it, exclude: [
+						"com/geoffwellington/manager/ListManagerApplication.class",
+						"**/configuration/*",
+						"**/exception/*",
+						"**/model/**"
+				])
+			}))
+		}
+	}
+}
+
+
+check.dependsOn jacocoTestCoverageVerification
