@@ -1,5 +1,6 @@
 package com.geoffwellington.manager.controller;
 
+import com.geoffwellington.manager.model.dto.RegistrationRequest;
 import com.geoffwellington.manager.model.dto.UserDTO;
 import com.geoffwellington.manager.service.UserService;
 import java.util.UUID;
@@ -25,8 +26,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userRequest) {
-        UserDTO user = userService.createUser(userRequest);
+    public ResponseEntity<UserDTO> createUser(@RequestBody RegistrationRequest registrationRequest) {
+        UserDTO user = userService.registerUser(registrationRequest);
 
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }

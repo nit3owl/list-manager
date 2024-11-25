@@ -9,6 +9,7 @@ import com.geoffwellington.manager.exception.UserNotFoundException;
 import com.geoffwellington.manager.exception.ValidationException;
 import com.geoffwellington.manager.model.SubscriptionType;
 import com.geoffwellington.manager.model.User;
+import com.geoffwellington.manager.model.dto.RegistrationRequest;
 import com.geoffwellington.manager.model.dto.UserDTO;
 import com.geoffwellington.manager.repository.UserRepository;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceV1Test {
@@ -29,19 +31,22 @@ class UserServiceV1Test {
     @Mock
     private ModelMapper modelMapper;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private UserService userService;
 
     @BeforeEach
     public void setup() {
-        userService = new UserServiceV1(userRepository, modelMapper);
+        userService = new UserServiceV1(userRepository, modelMapper, passwordEncoder);
     }
 
     @Test
     public void doesCreateNewUserWithFreeSubscription() {
-        UserDTO anyNewUser = new UserDTO();
-        anyNewUser.setFirstName("AnyFirstName");
-        anyNewUser.setLastName("AnyLastName");
-        anyNewUser.setEmail("anyValidEmail@foo.bar");
+        RegistrationRequest anyValidRegistrtationRequest = new RegistrationRequest();
+        anyValidRegistrtationRequest.setFirstName("AnyFirstName");
+        anyValidRegistrtationRequest.setLastName("AnyLastName");
+        anyValidRegistrtationRequest.setEmail("anyValidEmail@foo.bar");
 
         User user = new User();
         user.setFirstName("AnyFirstName");
@@ -49,45 +54,50 @@ class UserServiceV1Test {
         user.setEmail("anyValidEmail@foo.bar");
         user.setSubscriptionType(SubscriptionType.FREE);
 
-        when(userRepository.save(user)).thenReturn(user);
-        when(modelMapper.map(anyNewUser, User.class)).thenReturn(user);
-        when(modelMapper.map(user, UserDTO.class)).thenReturn(anyNewUser);
+        UserDTO newUserDto = new UserDTO();
+        newUserDto.setFirstName("AnyFirstName");
+        newUserDto.setLastName("AnyLastName");
+        newUserDto.setEmail("anyValidEmail@foo.bar");
+        newUserDto.setSubscriptionType(SubscriptionType.FREE);
 
-        UserDTO created = userService.createUser(anyNewUser);
+        when(userRepository.save(user)).thenReturn(user);
+        when(modelMapper.map(user, UserDTO.class)).thenReturn(newUserDto);
+
+        UserDTO created = userService.registerUser(anyValidRegistrtationRequest);
         assertNotNull(created);
         assertEquals(SubscriptionType.FREE, created.getSubscriptionType());
     }
 
     @Test
     public void shouldRejectUserWithoutFirstName() {
-        UserDTO anyNewUser = new UserDTO();
-        anyNewUser.setFirstName(null);
-        anyNewUser.setLastName("AnyLastName");
-        anyNewUser.setEmail("anyValidEmail@foo.bar");
+        RegistrationRequest registrationRequestWithoutFName = new RegistrationRequest();
+        registrationRequestWithoutFName.setFirstName(null);
+        registrationRequestWithoutFName.setLastName("AnyLastName");
+        registrationRequestWithoutFName.setEmail("anyValidEmail@foo.bar");
 
-        assertThrows(ValidationException.class, () -> userService.createUser(anyNewUser),
+        assertThrows(ValidationException.class, () -> userService.registerUser(registrationRequestWithoutFName),
                 "Expected ValidationException");
     }
 
     @Test
     public void shouldRejectUserWithoutLastName() {
-        UserDTO anyNewUser = new UserDTO();
-        anyNewUser.setFirstName("AnyFirstName");
-        anyNewUser.setLastName(null);
-        anyNewUser.setEmail("anyValidEmail@foo.bar");
+        RegistrationRequest registrationRequestWithoutLName = new RegistrationRequest();
+        registrationRequestWithoutLName.setFirstName(null);
+        registrationRequestWithoutLName.setLastName("AnyLastName");
+        registrationRequestWithoutLName.setEmail("anyValidEmail@foo.bar");
 
-        assertThrows(ValidationException.class, () -> userService.createUser(anyNewUser),
+        assertThrows(ValidationException.class, () -> userService.registerUser(registrationRequestWithoutLName),
                 "Expected ValidationException");
     }
 
     @Test
     public void shouldRejectUserWithInvalidEmail() {
-        UserDTO anyNewUser = new UserDTO();
-        anyNewUser.setFirstName("AnyFirstName");
-        anyNewUser.setLastName("AnyLastName");
-        anyNewUser.setEmail("abc");
+        RegistrationRequest registrationRequestWithInvalidEmail = new RegistrationRequest();
+        registrationRequestWithInvalidEmail.setFirstName(null);
+        registrationRequestWithInvalidEmail.setLastName("AnyLastName");
+        registrationRequestWithInvalidEmail.setEmail("abc");
 
-        assertThrows(ValidationException.class, () -> userService.createUser(anyNewUser),
+        assertThrows(ValidationException.class, () -> userService.registerUser(registrationRequestWithInvalidEmail),
                 "Expected ValidationException");
     }
 

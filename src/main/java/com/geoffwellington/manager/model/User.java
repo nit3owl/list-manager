@@ -29,8 +29,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column
+    @Column(unique = true, nullable = false)
     private String email;
+
+    @Column(name = "u_password", nullable = false)
+    private String password;
+
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
+
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
     @CreatedDate
     @Column
@@ -40,12 +49,6 @@ public class User {
     @Column
     private Instant modified;
 
-    @Column(name = "first_name", nullable = false)
-    private String firstName;
-
-    @Column(name = "last_name", nullable = false)
-    private String lastName;
-
     @Column(name = "subscription_type", nullable = false)
     private SubscriptionType subscriptionType;
 
@@ -54,19 +57,6 @@ public class User {
 
     @OneToMany(mappedBy = "owner")
     private Set<ManagedList> lists;
-
-    public User(UUID id, String email, Instant created, Instant modified, String firstName, String lastName,
-                SubscriptionType subscriptionType, Set<Membership> memberships, Set<ManagedList> lists) {
-        this.id = id;
-        this.email = email;
-        this.created = created;
-        this.modified = modified;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.subscriptionType = subscriptionType;
-        this.memberships = memberships;
-        this.lists = lists;
-    }
 
     public User(String firstName, String lastName, String email) {
         this.firstName = firstName;
@@ -80,6 +70,42 @@ public class User {
 
     public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Instant getCreated() {
@@ -98,26 +124,6 @@ public class User {
         this.modified = modified;
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
     public SubscriptionType getSubscriptionType() {
         return subscriptionType;
     }
@@ -132,14 +138,6 @@ public class User {
 
     public void setMemberships(Set<Membership> memberships) {
         this.memberships = memberships;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public Set<ManagedList> getLists() {

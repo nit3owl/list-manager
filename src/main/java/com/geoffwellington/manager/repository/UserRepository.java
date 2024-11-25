@@ -16,5 +16,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     void deleteById(UUID id);
 
+    Optional<User> findByEmail(String email);
+
     Iterable<User> findBySubscriptionType(SubscriptionType type);
 }

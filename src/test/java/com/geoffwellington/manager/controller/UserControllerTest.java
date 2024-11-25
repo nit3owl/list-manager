@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
+import com.geoffwellington.manager.model.dto.RegistrationRequest;
 import com.geoffwellington.manager.model.dto.UserDTO;
 import com.geoffwellington.manager.service.UserService;
 import java.time.Instant;
@@ -32,10 +33,10 @@ class UserControllerTest {
 
     @Test
     public void shouldReturnNewUserAnd201WhenBodyValid() {
-        UserDTO anyValidDTO = new UserDTO();
-        when(userService.createUser(anyValidDTO)).thenReturn(new UserDTO());
+        RegistrationRequest anyValidRegistrationRequest = new RegistrationRequest();
+        when(userService.registerUser(anyValidRegistrationRequest)).thenReturn(new UserDTO());
 
-        ResponseEntity<UserDTO> response = userController.createUser(anyValidDTO);
+        ResponseEntity<UserDTO> response = userController.createUser(anyValidRegistrationRequest);
 
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
